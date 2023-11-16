@@ -9,7 +9,6 @@ const BarangTable = ({ data, onEdit, onDelete, onAdd }) => {
     const [form] = Form.useForm();
     const showModal = (record) => {
         form.resetFields();
-        // setEditedRecord(null);
         setEditedRecord(record);
 
         if (record) {
@@ -41,15 +40,12 @@ const BarangTable = ({ data, onEdit, onDelete, onAdd }) => {
             const values = await form.validateFields();
 
             if (editedRecord) {
-                // If editing, update editedRecord with the latest form values
                 const updatedRecord = { ...editedRecord, ...values };
                 onEdit(updatedRecord);
             } else {
-                // If adding, pass the form values to onAdd
                 onAdd(values);
             }
 
-            // Reset the form fields and close the modal
             form.resetFields();
             setIsModalVisible(false);
             setIsAddModalVisible(false);

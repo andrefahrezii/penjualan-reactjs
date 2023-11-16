@@ -1,75 +1,101 @@
-// import React, { useState, useEffect, useRef } from 'react';
-// import { Bar } from 'react-chartjs-2';
-// import Chart from 'chart.js/auto';
+import React, { useState, useEffect, useRef } from 'react';
+import Chart from 'chart.js/auto';
+import 'chartjs-adapter-date-fns';
 
-// const SalesChart = () => {
-//     const canvasRef = useRef();
-//     const [salesData, setSalesData] = useState([]);
-//     const [chartInstance, setChartInstance] = useState(null);
+const SalesChart = ({ data }) => {
+    const canvasRef = useRef();
+    const [chartInstance, setChartInstance] = useState(null);
 
-//     useEffect(() => {
-//         const fetchData = async () => {
-//             try {
-//                 const response = await fetch('http://localhost:3000/penjualan');
-//                 const data = await response.json();
-//                 setSalesData(data);
-//                 console.log('Data penjualan:', data);
-//             } catch (error) {
-//                 console.error('Error mengambil data penjualan:', error);
-//             }
-//         };
+    const namaBarangMap = {
+        1: 'Kopi',
+        2: 'Teh',
+        3: 'Pasta Gigi',
+        4: 'Sabun Mandi',
+        5: 'Sampo',
+    };
 
-//         fetchData();
+    useEffect(() => {
+        if (!canvasRef.current || !data || data.length === 0) {
+            return;
+        }
 
-//         // Membersihkan instance chart
-//         if (chartInstance) {
-//             if (chartInstance.destroy) {
-//                 chartInstance.destroy();
-//             } else {
-//                 const canvas = canvasRef.current;
-//                 const ctx = canvas.getContext('2d');
-//                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-//             }
-//         }
+        if (chartInstance && chartInstance.destroy) {
+            chartInstance.destroy();
+        }
 
-//         // Membuat chart baru
-//         const ctx = canvasRef.current.getContext('2d');
-//         const newChartInstance = new Chart(ctx, {
-//             type: 'bar',
-//             data: {
-//                 labels: salesData.map(entry => entry.tanggalPenjualan),
-//                 datasets: [
-//                     {
-//                         label: 'Jumlah Penjualan',
-//                         backgroundColor: 'rgba(75,192,192,0.4)',
-//                         borderColor: 'rgba(75,192,192,1)',
-//                         borderWidth: 1,
-//                         hoverBackgroundColor: 'rgba(75,192,192,0.8)',
-//                         hoverBorderColor: 'rgba(75,192,192,1)',
-//                         data: salesData.map(entry => entry.totalHarga),
-//                     },
-//                 ],
-//             },
-//         });
+        const groupedData = data.reduce((acc, entry) => {
+            const barangId = entry.barangId;
+            if (!acc[barangId]) {
+                acc[barangId] = {
+                    totalHarga: 0,
+                    namaBarang: namaBarangMap[barangId] || `Barang ${barangId}`,
+                };
+            }
+            acc[barangId].totalHarga += entry.totalHarga;
+            return acc;
+        }, {});
 
-//         // Menyimpan instance chart ke state
-//         setChartInstance(newChartInstance);
+        const sortedData = Object.values(groupedData)
+            .sort((a, b) => b.totalHarga - a.totalHarga)
+            .slice(0, 5);
 
-//         // Membersihkan chart sebelum komponen di-unmount
-//         return () => {
-//             if (newChartInstance && newChartInstance.destroy) {
-//                 newChartInstance.destroy();
-//             }
-//         };
+        const labels = sortedData.map(entry => entry.namaBarang);
+        const dataValues = sortedData.map(entry => entry.totalHarga);
+        const backgroundColors = Array.from({ length: sortedData.length }, (_, i) =>
+            `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.4)`
+        );
 
-//     }, [salesData]);
+        const ctx = canvasRef.current.getContext('2d');
+        const newChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Jumlah Penjualan',
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
+                        borderColor: 'rgba(75,192,192,1)',
+                        borderWidth: 1,
+                    },
+                ],
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const index = context.dataIndex;
+                                const barangId = sortedData[index].namaBarang;
+                                const transactions = data
+                                    .filter(entry => entry.barangId === parseInt(barangId.replace('Barang ', '')))
+                                    .map(entry => `Tanggal: ${entry.tanggalPenjualan}, Total Harga: ${entry.totalHarga}`)
+                                    .join('\n');
+                                return `${transactions}`;
+                            },
+                        },
+                    },
+                },
+            },
+        });
 
-//     return (
-//         <div>
-//             <h3>Grafik Penjualan</h3>
-//             {salesData.length > 0 && <Bar data={{}} options={{}} ref={canvasRef} />}
-//         </div>
-//     );
-// };
+        setChartInstance(newChartInstance);
+    }, [data]);
 
-// export default SalesChart;
+    useEffect(() => {
+        return () => {
+            if (chartInstance && chartInstance.destroy) {
+                chartInstance.destroy();
+            }
+        };
+    }, [chartInstance]);
+
+    return (
+        <div>
+            <h3>Grafik Penjualan</h3>
+            <canvas ref={canvasRef} />
+        </div>
+    );
+};
+
+export default SalesChart;

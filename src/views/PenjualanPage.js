@@ -7,7 +7,6 @@ const PenjualanPage = () => {
     const [refreshData, setRefreshData] = useState(false);
 
     useEffect(() => {
-        // Load data or fetch data from your server when the component mounts
         fetchData();
     }, [refreshData]);
 
@@ -38,7 +37,7 @@ const PenjualanPage = () => {
 
             if (response.ok) {
                 message.success('Data berhasil dikirim');
-                setRefreshData((prev) => !prev); // Refresh data setelah mengirim
+                setRefreshData((prev) => !prev);
             } else {
                 const errorData = await response.json();
                 message.error(`Gagal Mengirim Data: ${errorData.message}`);
@@ -49,13 +48,9 @@ const PenjualanPage = () => {
     };
 
     const onEdit = (editedRecord) => {
-        // Implementasi logika untuk mengedit data
-        // ...
     };
 
     const onDelete = async (recordId) => {
-        // Implementasi logika untuk menghapus data
-        // ...
     };
 
     return (
@@ -63,9 +58,9 @@ const PenjualanPage = () => {
 
         < Penjualan
             data={data}
-            onAdd={onAdd}  // Pastikan nilai ini diberikan dengan benar
-            onEdit={onEdit}  // Pastikan nilai ini diberikan dengan benar
-            onDelete={onDelete}  // Pastikan nilai ini diberikan dengan benar
+            onAdd={onAdd}
+            onEdit={onEdit}
+            onDelete={onDelete}
         />
 
 

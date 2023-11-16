@@ -1,6 +1,6 @@
-// salespage.js
 import React, { useEffect, useState } from 'react';
 import SalesTable from '../components/SalesTable';
+import SalesChart from '../components/SalesChart';
 
 const SalesPage = () => {
     const [data, setData] = useState([]);
@@ -11,34 +11,25 @@ const SalesPage = () => {
     const [barangId, setBarangId] = useState(null);
 
     useEffect(() => {
-        // Buat URL berdasarkan parameter pencarian, filter, barangId, limit, dan order
         let url = 'http://localhost:3000/penjualan';
-
-        // Tambahkan parameter pencarian ke URL jika ada
         if (searchTerm) {
             url += `?search=${searchTerm}`;
         }
-
-        // Tambahkan parameter filter ke URL jika ada
         if (filterTerm) {
             url += `${searchTerm ? '&' : '?'}filter=${filterTerm}`;
         }
 
-        // Tambahkan parameter barangId ke URL jika ada
         if (barangId) {
             url += `${searchTerm || filterTerm ? '&' : '?'}barangId=${barangId}`;
         }
 
-        // Tambahkan parameter limit dan order ke URL jika ada
         url += `${searchTerm || filterTerm || barangId ? '&' : '?'}limit=${limit}&order=${order}`;
 
-        // Fetch data from the endpoint
         fetch(url)
             .then(response => response.json())
             .then(data => setData(data))
             .catch(error => console.error('Error fetching data:', error));
     }, [searchTerm, filterTerm, barangId, limit, order]);
-
     return (
         <div style={{ padding: '20px' }}>
             <div style={{ marginBottom: '10px' }}>
@@ -78,7 +69,7 @@ const SalesPage = () => {
                     <option value="DESC">Terdikit</option>
                 </select>
             </div>
-
+            <SalesChart data={data} />
             <SalesTable data={data} />
         </div>
     );

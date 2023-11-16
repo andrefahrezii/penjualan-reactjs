@@ -8,12 +8,20 @@ const Penjualan = ({ data, onEdit, onDelete, onAdd }) => {
     const [form] = Form.useForm();
     const [tempData, setTempData] = useState([]);
 
+    const namaBarangMap = {
+        1: 'Kopi',
+        2: 'Teh',
+        3: 'Pasta Gigi',
+        4: 'Sabun Mandi',
+        5: 'Sampo',
+    };
+
     const showModal = (record) => {
         form.resetFields();
         setEditedRecord(record);
         setIsModalVisible(true);
     };
-    console.log(onAdd, onEdit, onDelete, "onadd")
+
     const showAddModal = () => {
         form.resetFields();
         setEditedRecord(null);
@@ -33,7 +41,6 @@ const Penjualan = ({ data, onEdit, onDelete, onAdd }) => {
                 const updatedRecord = { ...editedRecord, ...values };
                 onEdit(updatedRecord);
             } else {
-                // Menambahkan data baru ke dalam array data sementara
                 setTempData([...tempData, { id: Date.now(), ...values }]);
             }
 
@@ -44,17 +51,12 @@ const Penjualan = ({ data, onEdit, onDelete, onAdd }) => {
             console.log('Validation Failed:', errorInfo);
         }
     };
+
     const handleSend = async () => {
         try {
-            // Pastikan onAdd adalah fungsi sebelum memanggilnya
             if (typeof onAdd === 'function') {
-                // Panggil fungsi onAdd dari properti dengan data sementara
                 await onAdd(tempData);
-
-                // Jika berhasil, reset data sementara
                 setTempData([]);
-
-                // Sembunyikan modal
                 setIsModalVisible(false);
             } else {
                 console.error('Error sending data: onAdd is not a function');
@@ -64,10 +66,7 @@ const Penjualan = ({ data, onEdit, onDelete, onAdd }) => {
         }
     };
 
-
-
     const columns = [
-        // ... your existing columns configuration
         {
             title: 'Action',
             key: 'action',
@@ -92,26 +91,12 @@ const Penjualan = ({ data, onEdit, onDelete, onAdd }) => {
         },
     ];
 
-    // Menambahkan kolom "Temporary Data" hanya jika ada data sementara
-
-    // columns.unshift({
-    //     title: 'Temporary Data',
-    //     key: 'tempData',
-    //     render: (text, record) => (
-    //         <Space size="middle">
-    //             {/* Menampilkan data dari tempData */}
-    //             <span>{record.barangId}</span>
-    //             <span>{record.jumlah}</span>
-    //             <span>{record.totalHarga}</span>
-    //             <span>{record.tanggalPenjualan}</span>
-    //         </Space>
-    //     ),
-    // });
     columns.unshift(
         {
             title: 'Temporary Barang ID',
             dataIndex: 'barangId',
             key: 'barangId',
+            render: (barangId) => namaBarangMap[barangId] || `Barang ${barangId}`,
         },
         {
             title: 'Temporary Jumlah',
@@ -130,9 +115,6 @@ const Penjualan = ({ data, onEdit, onDelete, onAdd }) => {
         }
     );
 
-
-    console.log(tempData.length)
-    console.log(tempData)
     return (
         <div>
             <Title level={2}>Penjualan</Title>
@@ -172,7 +154,6 @@ const Penjualan = ({ data, onEdit, onDelete, onAdd }) => {
                             <Select.Option value="3">Pasta Gigi</Select.Option>
                             <Select.Option value="4">Sabun Mandi</Select.Option>
                             <Select.Option value="5">Sampo</Select.Option>
-                            {/* Tambahkan opsi lainnya sesuai kebutuhan */}
                         </Select>
                     </Form.Item>
                     <Form.Item

@@ -1,6 +1,4 @@
-// salespage.js
 import React, { useEffect, useState } from 'react';
-import SalesTable from '../components/SalesTable';
 import BarangTable from '../components/BarangTable';
 import { message } from 'antd';
 
@@ -14,11 +12,9 @@ const BarangPage = () => {
     const [refreshData, setRefreshData] = useState(false);
 
     useEffect(() => {
-        // Fetch data from the endpoint
         const fetchData = async () => {
             try {
                 let url = 'http://localhost:3000/barang';
-                // ... (build URL based on other parameters)
 
                 const response = await fetch(url);
                 if (response.ok) {
@@ -47,7 +43,6 @@ const BarangPage = () => {
             });
 
             if (response.ok) {
-                const data = await response.json();
                 message.success(`Data Berhasil Ditambahkan`);
                 setRefreshData((prev) => !prev);
             } else {
